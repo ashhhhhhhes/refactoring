@@ -2,6 +2,7 @@ import {MovieType} from "../models/enums/movie.type";
 import Invoice from "../models/invoice";
 import Plays from "../models/plays";
 import Performances from "../models/performance";
+import {invoice} from "../datas/data";
 
 
 export default class Statement {
@@ -76,24 +77,38 @@ export default class Statement {
         }).format(aNumber);
     }
 
-    public statement() {
-        let totalAmount = 0;
+    private totalVolumeCredits() {
         let volumeCredits = 0;
+
+        for (let perf of this.invoice.performances) {
+            volumeCredits += this.volumeCreditsFor(perf);
+        }
+
+        return volumeCredits;
+    }
+
+    private totalAmount() {
+        let totalAmount = 0;
+        for (let perf of invoice.performances) {
+            totalAmount += this.amountFor(perf);
+        }
+        return totalAmount;
+    }
+
+    public statement() {
 
         let result = `🧾 청구 내역 (고객명: ${this.invoice.customer})`;
 
-
         for (let perf of this.invoice.performances) {
 
-            volumeCredits += this.volumeCreditsFor(perf);
 
             // 청구 내역을 출력한다.
             result += `${this.playFor(perf).name}: ${this.usd(this.amountFor(perf) / 100)} (${perf.audience}석)\n`;
-            totalAmount += this.amountFor(perf);
+
         }
 
-        result += `총액: ${this.usd(totalAmount / 100)}\n`;
-        result += `적립포인트: ${this.usd(volumeCredits)}점`;
+        result += `총액: ${this.usd(this.totalAmount() / 100)}\n`;
+        result += `적립포인트: ${this.totalVolumeCredits()}점`;
 
         return result;
     }
