@@ -68,29 +68,32 @@ export default class Statement {
         return volumeCredits;
     }
 
+    private usd(aNumber: number) {
+        return new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+            minimumFractionDigits: 2
+        }).format(aNumber);
+    }
+
     public statement() {
         let totalAmount = 0;
         let volumeCredits = 0;
 
         let result = `🧾 청구 내역 (고객명: ${this.invoice.customer})`;
 
-        const format = new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD",
-            minimumFractionDigits: 2
-        }).format;
 
         for (let perf of this.invoice.performances) {
 
             volumeCredits += this.volumeCreditsFor(perf);
 
             // 청구 내역을 출력한다.
-            result += `${this.playFor(perf).name}: ${format(this.amountFor(perf) / 100)} (${perf.audience}석)\n`;
+            result += `${this.playFor(perf).name}: ${this.usd(this.amountFor(perf) / 100)} (${perf.audience}석)\n`;
             totalAmount += this.amountFor(perf);
         }
 
-        result += `총액: ${format(totalAmount / 100)}\n`;
-        result += `적립포인트: ${format(volumeCredits)}점`;
+        result += `총액: ${this.usd(totalAmount / 100)}\n`;
+        result += `적립포인트: ${this.usd(volumeCredits)}점`;
 
         return result;
     }
