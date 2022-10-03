@@ -1,6 +1,6 @@
-import {statement} from "./service/statement";
+import statement from "./service/statement";
 import {invoice, plays} from './datas/data';
 
 // * print Invoice.
-console.log(statement(invoice, plays));
+console.log(new statement(invoice, plays).forStatement());
 
