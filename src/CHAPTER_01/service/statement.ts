@@ -50,7 +50,7 @@ export function statement(invoice: Invoice, plays: Plays) {
     }
 
     result += `총액: ${format(totalAmount / 100)}\n`;
-    result += `적립포인트: ${format(volumeCredits)}점\n`;
+    result += `적립포인트: ${format(volumeCredits)}점`;
 
     return result;
 }
