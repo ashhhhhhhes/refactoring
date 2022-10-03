@@ -4,7 +4,7 @@ import Plays from "../models/plays";
 import Performances from "../models/performance";
 
 
-export default class statement {
+export default class Statement {
 
     private _invoice: Invoice;
 
@@ -31,7 +31,7 @@ export default class statement {
         this._plays = value;
     }
 
-    public amountFor(aPerformance: Performances) {
+    private amountFor(aPerformance: Performances) {
         let result: number = 0;
 
         switch (this.playFor(aPerformance).type) {
@@ -54,12 +54,21 @@ export default class statement {
         return result;
     }
 
-
-    public playFor(perf: Performances) {
+    private playFor(perf: Performances) {
         return this._plays.find(perf.playId);
     }
 
-    public forStatement() {
+    private volumeCreditsFor(perf: Performances) {
+        let volumeCredits: number = 0;
+
+        volumeCredits += Math.max(perf.audience - 30, 0);
+
+        if (MovieType.COMEDY === this.playFor(perf).type) volumeCredits += Math.floor(perf.audience / 5);
+
+        return volumeCredits;
+    }
+
+    public statement() {
         let totalAmount = 0;
         let volumeCredits = 0;
 
@@ -73,17 +82,11 @@ export default class statement {
 
         for (let perf of this.invoice.performances) {
 
-            let thisAmount = this.amountFor(perf);
-
-            // 포인트 적립.
-            volumeCredits += Math.max(perf.audience - 30, 0);
-
-            // 희극 관객 5명마다 추가 포인트를 제공한다.
-            if (MovieType.COMEDY === this.playFor(perf).type) volumeCredits += Math.floor(perf.audience / 5);
+            volumeCredits += this.volumeCreditsFor(perf);
 
             // 청구 내역을 출력한다.
-            result += `${this.playFor(perf).name}: ${format(thisAmount / 100)} (${perf.audience}석)\n`;
-            totalAmount += thisAmount;
+            result += `${this.playFor(perf).name}: ${format(this.amountFor(perf) / 100)} (${perf.audience}석)\n`;
+            totalAmount += this.amountFor(perf);
         }
 
         result += `총액: ${format(totalAmount / 100)}\n`;
@@ -91,6 +94,8 @@ export default class statement {
 
         return result;
     }
+
+
 }
 
 

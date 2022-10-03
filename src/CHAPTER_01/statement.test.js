@@ -1,4 +1,4 @@
-import statement from "./service/statement";
+import Statement from "./service/statement";
 import {invoice, plays} from './datas/data';
 
 
@@ -9,5 +9,5 @@ Othello: $500.00 (40석)
 적립포인트: $47.00점`;
 
 test('statement ', () => {
-    expect(new statement(invoice, plays).forStatement()).toBe(result);
+    expect(new Statement(invoice, plays).statement()).toBe(result);
 });
