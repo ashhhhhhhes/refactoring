@@ -1,6 +1,31 @@
 import {MovieType} from "../models/enums/movie.type";
 import Invoice from "../models/invoice";
 import Plays from "../models/plays";
+import Play from "../models/play";
+import Performances from "../models/performance";
+
+function amountFor(play: Play, perf: Performances) {
+    let thisAmount: number = 0;
+
+    switch (play.type) {
+        case MovieType.TRAGEDY:
+            thisAmount = 40000;
+            if (perf.audience > 30) {
+                thisAmount += 1000 * (perf.audience - 30);
+            }
+            break;
+        case MovieType.COMEDY:
+            thisAmount = 30000;
+            if (perf.audience > 20) {
+                thisAmount += 10000 + 500 * (perf.audience - 20);
+            }
+            thisAmount += 300 * perf.audience;
+            break;
+        default:
+            throw new Error(`알 수 없는 장르: ${play.type}`);
+    }
+    return thisAmount;
+}
 
 export function statement(invoice: Invoice, plays: Plays) {
 
@@ -18,25 +43,7 @@ export function statement(invoice: Invoice, plays: Plays) {
     for (let perf of invoice.performances) {
         const play = plays.find(perf.playId);
 
-        let thisAmount = 0;
-
-        switch (play.type) {
-            case MovieType.TRAGEDY:
-                thisAmount = 40000;
-                if (perf.audience > 30) {
-                    thisAmount += 1000 * (perf.audience - 30);
-                }
-                break;
-            case MovieType.COMEDY:
-                thisAmount = 30000;
-                if (perf.audience > 20) {
-                    thisAmount += 10000 + 500 * (perf.audience - 20);
-                }
-                thisAmount += 300 * perf.audience;
-                break;
-            default:
-                throw new Error(`알 수 없는 장르: ${play.type}`);
-        }
+        let thisAmount = amountFor(play, perf);
 
         // 포인트 적립.
         volumeCredits += Math.max(perf.audience - 30, 0);
