@@ -1,6 +1,7 @@
 import Invoice from "../models/invoice";
 import Plays from "../models/plays";
 import render from "./render";
+import Performances from "../models/performance";
 
 
 export default class Statement {
@@ -33,7 +34,15 @@ export default class Statement {
     }
 
     public statement(): string {
-        return render(this.invoice, this.plays).renderPlainText();
+        const statementData: any = {};
+        statementData.customer = this.invoice.customer;
+        statementData.performances = this.invoice.performances.map(this.enrichPerformance);
+
+        return render(this.invoice, this.plays).renderPlainText(statementData);
+    }
+
+    private enrichPerformance(aPerformance: Performances): Performances {
+        return aPerformance.clone();
     }
 
 

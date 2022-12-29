@@ -93,10 +93,10 @@ export class Render {
         return totalAmount;
     }
 
-    public renderPlainText(): string {
-        let result = `🧾 청구 내역 (고객명: ${this.invoice.customer})`;
+    public renderPlainText(data: { customer: string, performances: Performances[] }): string {
+        let result = `🧾 청구 내역 (고객명: ${data.customer})`;
 
-        for (let perf of this.invoice.performances) {
+        for (let perf of data.performances) {
 
             // 청구 내역을 출력한다.
             result += `${this.playFor(perf).name}: ${this.usd(this.amountFor(perf) / 100)} (${perf.audience}석)\n`;
