@@ -10,7 +10,6 @@ export default class Statement {
 
     private _plays: Plays;
 
-
     constructor(invoice: Invoice, plays: Plays) {
         this._invoice = invoice;
         this._plays = plays;
@@ -38,7 +37,7 @@ export default class Statement {
         statementData.customer = this.invoice.customer;
         statementData.performances = this.invoice.performances.map(this.enrichPerformance);
 
-        return render(this.invoice, this.plays).renderPlainText(statementData);
+        return render(statementData, this.plays).renderPlainText();
     }
 
     private enrichPerformance(aPerformance: Performances): Performances {

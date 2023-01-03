@@ -1,25 +1,34 @@
-import Invoice from "../models/invoice";
 import Plays from "../models/plays";
 import Performances from "../models/performance";
 import {MovieType} from "../models/enums/movie.type";
 
 export class Render {
 
-    private _invoice: Invoice;
+    private _customer: string;
+    private _performances: any[];
 
     private _plays: Plays;
 
-    constructor(invoice: Invoice, plays: Plays) {
-        this._invoice = invoice;
+    constructor(customer: string, performances: any[], plays: Plays) {
+        this._customer = customer;
+        this._performances = performances;
         this._plays = plays;
     }
 
-    get invoice(): Invoice {
-        return this._invoice;
+    get customer(): string {
+        return this._customer;
     }
 
-    set invoice(value: Invoice) {
-        this._invoice = value;
+    set customer(value: string) {
+        this._customer = value;
+    }
+
+    get performances(): any[] {
+        return this._performances;
+    }
+
+    set performances(value: any[]) {
+        this._performances = value;
     }
 
     get plays(): Plays {
@@ -78,7 +87,7 @@ export class Render {
     private totalVolumeCredits() {
         let volumeCredits = 0;
 
-        for (let perf of this.invoice.performances) {
+        for (let perf of this.performances) {
             volumeCredits += this.volumeCreditsFor(perf);
         }
 
@@ -87,16 +96,16 @@ export class Render {
 
     private totalAmount() {
         let totalAmount = 0;
-        for (let perf of this.invoice.performances) {
+        for (let perf of this.performances) {
             totalAmount += this.amountFor(perf);
         }
         return totalAmount;
     }
 
-    public renderPlainText(data: { customer: string, performances: Performances[] }): string {
-        let result = `🧾 청구 내역 (고객명: ${data.customer})`;
+    public renderPlainText(): string {
+        let result = `🧾 청구 내역 (고객명: ${this.customer})`;
 
-        for (let perf of data.performances) {
+        for (let perf of this.performances) {
 
             // 청구 내역을 출력한다.
             result += `${this.playFor(perf).name}: ${this.usd(this.amountFor(perf) / 100)} (${perf.audience}석)\n`;
@@ -112,4 +121,4 @@ export class Render {
 }
 
 
-export default (invoice: Invoice, plays: Plays) => new Render(invoice, plays);
+export default (data: { customer: string, performances: any[] }, plays: Plays) => new Render(data.customer, data.performances, plays);
