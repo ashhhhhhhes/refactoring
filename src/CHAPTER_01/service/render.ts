@@ -1,18 +1,13 @@
-import Plays from "../models/plays";
-import Performances from "../models/performance";
-import {MovieType} from "../models/enums/movie.type";
+import {RenderData} from "../models/render.data";
 
 export class Render {
 
     private _customer: string;
     private _performances: any[];
+    private _totalAmount: number;
+    private _totalVolumeCredits: number;
 
-    private _plays: Plays;
-
-    constructor(customer: string, performances: any[], plays: Plays) {
-        this._customer = customer;
-        this._performances = performances;
-        this._plays = plays;
+    constructor() {
     }
 
     get customer(): string {
@@ -23,7 +18,7 @@ export class Render {
         this._customer = value;
     }
 
-    get performances(): any[] {
+    get performances(): RenderData[] {
         return this._performances;
     }
 
@@ -31,49 +26,24 @@ export class Render {
         this._performances = value;
     }
 
-    get plays(): Plays {
-        return this._plays;
+    get totalAmount(): number {
+        return this._totalAmount;
     }
 
-    set plays(value: Plays) {
-        this._plays = value;
+    set totalAmount(value: number) {
+        this._totalAmount = value;
     }
 
-    private amountFor(aPerformance: Performances) {
-        let result: number = 0;
-
-        switch (this.playFor(aPerformance).type) {
-            case MovieType.TRAGEDY:
-                result = 40000;
-                if (aPerformance.audience > 30) {
-                    result += 1000 * (aPerformance.audience - 30);
-                }
-                break;
-            case MovieType.COMEDY:
-                result = 30000;
-                if (aPerformance.audience > 20) {
-                    result += 10000 + 500 * (aPerformance.audience - 20);
-                }
-                result += 300 * aPerformance.audience;
-                break;
-            default:
-                throw new Error(`알 수 없는 장르: ${this.playFor(aPerformance).type}`);
-        }
-        return result;
+    get totalVolumeCredits(): number {
+        return this._totalVolumeCredits;
     }
 
-    private playFor(perf: Performances) {
-        return this._plays.find(perf.playId);
+    set totalVolumeCredits(value: number) {
+        this._totalVolumeCredits = value;
     }
 
-    private volumeCreditsFor(perf: Performances) {
-        let volumeCredits: number = 0;
-
-        volumeCredits += Math.max(perf.audience - 30, 0);
-
-        if (MovieType.COMEDY === this.playFor(perf).type) volumeCredits += Math.floor(perf.audience / 5);
-
-        return volumeCredits;
+    public static builder(): RenderBuilder {
+        return new RenderBuilder();
     }
 
     private usd(aNumber: number) {
@@ -84,23 +54,6 @@ export class Render {
         }).format(aNumber);
     }
 
-    private totalVolumeCredits() {
-        let volumeCredits = 0;
-
-        for (let perf of this.performances) {
-            volumeCredits += this.volumeCreditsFor(perf);
-        }
-
-        return volumeCredits;
-    }
-
-    private totalAmount() {
-        let totalAmount = 0;
-        for (let perf of this.performances) {
-            totalAmount += this.amountFor(perf);
-        }
-        return totalAmount;
-    }
 
     public renderPlainText(): string {
         let result = `🧾 청구 내역 (고객명: ${this.customer})`;
@@ -108,17 +61,61 @@ export class Render {
         for (let perf of this.performances) {
 
             // 청구 내역을 출력한다.
-            result += `${this.playFor(perf).name}: ${this.usd(this.amountFor(perf) / 100)} (${perf.audience}석)\n`;
+            result += `${perf.play.name}: ${this.usd(perf.amount / 100)} (${perf.audience}석)\n`;
 
         }
 
-        result += `총액: ${this.usd(this.totalAmount() / 100)}\n`;
-        result += `적립포인트: ${this.totalVolumeCredits()}점`;
+        result += `총액: ${this.usd(this.totalAmount / 100)}\n`;
+        result += `적립포인트: ${this.totalVolumeCredits}점`;
 
         return result;
     }
 
+
 }
 
+export class RenderBuilder {
 
-export default (data: { customer: string, performances: any[] }, plays: Plays) => new Render(data.customer, data.performances, plays);
+    private _customer: string;
+    private _performances: any[];
+    private _totalAmount: number;
+    private _totalVolumeCredits: number;
+
+    customer(value: string): RenderBuilder {
+        this._customer = value;
+        return this;
+    }
+
+    performances(value: any[]): RenderBuilder {
+        this._performances = value;
+        return this;
+    }
+
+    totalAmount(value: number): RenderBuilder {
+        this._totalAmount = value;
+        return this;
+    }
+
+    totalVolumeCredits(value: number): RenderBuilder {
+        this._totalVolumeCredits = value;
+        return this;
+    }
+
+    build() {
+        const render = new Render();
+        render.customer = this._customer;
+        render.performances = this._performances;
+        render.totalAmount = this._totalAmount;
+        render.totalVolumeCredits = this._totalVolumeCredits;
+
+        return render;
+    }
+}
+
+export default (data: { customer: string, performances: any[], totalAmount: number, totalVolumeCredits: number }) =>
+    Render.builder()
+        .customer(data.customer)
+        .performances(data.performances)
+        .totalAmount(data.totalAmount)
+        .totalVolumeCredits(data.totalVolumeCredits)
+        .build();

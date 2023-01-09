@@ -23,7 +23,7 @@ export default class Performances {
         this._audience = value;
     }
 
-    clone() {
-        return new Performances(this.playId, this.audience)
+    clone(): Performances {
+        return new Performances(this.playId, this.audience);
     }
 }
