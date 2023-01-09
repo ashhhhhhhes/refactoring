@@ -35,7 +35,13 @@ export default class Statement {
     public statement(): string {
         return render(
             createStatementData(this.invoice, this.plays)
-        ).renderPlainText();
+        ).plainText();
+    }
+
+    public htmlStatement() {
+        return render(
+            createStatementData(this.invoice, this.plays)
+        ).html();
     }
 }
 

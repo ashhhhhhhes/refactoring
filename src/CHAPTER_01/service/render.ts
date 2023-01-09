@@ -55,7 +55,10 @@ export class Render {
     }
 
 
-    public renderPlainText(): string {
+    /**
+     * render plain text.
+     */
+    public plainText(): string {
         let result = `🧾 청구 내역 (고객명: ${this.customer})`;
 
         for (let perf of this.performances) {
@@ -72,6 +75,30 @@ export class Render {
     }
 
 
+    /**
+     * render html.
+     */
+    public html(): string {
+        let result = `<h1>🧾 청구 내역 (고객명: ${this.customer})</h1>\n`;
+
+        result += "<table>\n";
+        result += "<tr><th>연극</th><th>좌석 수</th><th>금액</th></tr>\n";
+
+        for (let perf of this.performances) {
+
+            // 청구 내역을 출력한다.
+            result += `<tr><td>${perf.play.name}</tr></td>`;
+            result += `<tr><td>(${perf.audience}석)</td></tr>`;
+            result += `<tr><td>${this.usd(perf.amount / 100)}</tr></td>`;
+        }
+
+        result += "</table>\n";
+
+        result += `<p>총액: <em>${this.usd(this.totalAmount / 100)}</em></p>\n`;
+        result += `<p>적립포인트: <em>${this.totalVolumeCredits}점</em></p>`;
+
+        return result;
+    }
 }
 
 export class RenderBuilder {
