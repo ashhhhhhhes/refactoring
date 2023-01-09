@@ -2,8 +2,9 @@ import Invoice from "../models/invoice";
 import Plays from "../models/plays";
 import render from "./render";
 import Performances from "../models/performance";
-import {RenderData} from "../models/render.data";
+import {PerfRenderData} from "../models/perfRenderData";
 import {MovieType} from "../models/enums/movie.type";
+import StatementData from "../models/StatementData";
 
 
 export default class Statement {
@@ -67,40 +68,35 @@ export default class Statement {
         return volumeCredits;
     }
 
-    private totalVolumeCredits(data: any) {
-        let volumeCredits = 0;
-
-        for (let perf of data.performances) {
-            volumeCredits += perf.volumeCredits;
-        }
-
-        return volumeCredits;
+    private totalVolumeCredits(data: StatementData) {
+        return data.performances.reduce((volumeCredits: number, p: any) => volumeCredits + p.volumeCredits, 0);
     }
 
-    private totalAmount(data: any) {
-        let totalAmount = 0;
-        for (let perf of data.performances) {
-            totalAmount += perf.amount;
-        }
-        return totalAmount;
+    private totalAmount(data: StatementData) {
+        return data.performances.reduce((total: number, p: any) => total + p.amount, 0);
     }
 
     private playFor(perf: Performances) {
         return this._plays.find(perf.playId);
     }
 
-    private enrichPerformance(aPerformance: Performances): RenderData {
+    private enrichPerformance(aPerformance: Performances): PerfRenderData {
 
-        const renderData = RenderData.build(aPerformance);
-        renderData.play = this.playFor(aPerformance);
-        renderData.amount = this.amountFor(aPerformance);
-        renderData.volumeCredits = this.volumeCreditsFor(aPerformance);
+        const result = PerfRenderData.copy(aPerformance);
+        result.play = this.playFor(aPerformance);
+        result.amount = this.amountFor(aPerformance);
+        result.volumeCredits = this.volumeCreditsFor(aPerformance);
 
-        return renderData;
+        return result;
     }
 
     public statement(): string {
-        const statementData: any = {};
+        const statementData: StatementData = {
+            customer: null,
+            performances: null,
+            totalAmount: null,
+            totalVolumeCredits: null
+        };
         statementData.customer = this.invoice.customer;
         statementData.performances = this.invoice.performances.map((perf) => this.enrichPerformance(perf));
         statementData.totalAmount = this.totalAmount(statementData);

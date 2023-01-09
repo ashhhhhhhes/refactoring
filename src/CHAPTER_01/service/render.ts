@@ -1,4 +1,4 @@
-import {RenderData} from "../models/render.data";
+import {PerfRenderData} from "../models/perfRenderData";
 
 export class Render {
 
@@ -18,7 +18,7 @@ export class Render {
         this._customer = value;
     }
 
-    get performances(): RenderData[] {
+    get performances(): PerfRenderData[] {
         return this._performances;
     }
 

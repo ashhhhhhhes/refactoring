@@ -22,8 +22,4 @@ export default class Performances {
     set audience(value: number) {
         this._audience = value;
     }
-
-    clone(): Performances {
-        return new Performances(this.playId, this.audience);
-    }
 }
